@@ -42,9 +42,9 @@ prepare() {
   sed -i 's/^extern GType cc_background_panel_get_type (void);/&\nextern GType cc_ubuntu_panel_get_type (void);/' shell/cc-panel-loader.c
   sed -i 's/^    PANEL_TYPE ("background", cc_background_panel_get_type, NULL),/&\n    PANEL_TYPE ("ubuntu", cc_ubuntu_panel_get_type, NULL),/' shell/cc-panel-loader.c
   sed -i 's/^    "background",/&\n    "ubuntu",/' shell/cc-panel-list.c
-  # Named for what it is here, and shown on every GNOME (Ubuntu's file is for Ubuntu sessions only).
+  # Named for what it is here, shown on every GNOME (Ubuntu's file is for Ubuntu sessions only), with an icon GNOME has (Ubuntu's is in Yaru).
   sed -i -e 's/^Name=.*/Name=GNOME Desktop/' -e 's/^Comment=.*/Comment=Dock, desktop icons and tiling settings/' \
-    -e '/^OnlyShowIn=/d' panels/ubuntu/gnome-ubuntu-panel.desktop.in
+    -e '/^OnlyShowIn=/d' -e 's/^Icon=.*/Icon=user-desktop/' panels/ubuntu/gnome-ubuntu-panel.desktop.in
 }
 
 build() {

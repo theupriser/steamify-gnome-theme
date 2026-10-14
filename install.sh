@@ -72,6 +72,8 @@ mkdir -p "$(dirname "$bgxml")"
 # 4. Settings.
 gset org.gnome.desktop.interface color-scheme "'prefer-dark'"
 gset org.gnome.desktop.interface accent-color "'blue'"
+# adw-gtk3 follows the light/dark style of Settings > Appearance (CachyOS sets adw-gtk3-dark, which pins it dark).
+[[ -d /usr/share/themes/adw-gtk3 ]] && gset org.gnome.desktop.interface gtk-theme "'adw-gtk3'"
 # Windows with minimize and maximize buttons, like Ubuntu (GNOME shows only close by default).
 gset org.gnome.desktop.wm.preferences button-layout "'appmenu:minimize,maximize,close'"
 wallpaper="/usr/share/wallpapers/Steam Deck Logo Default.jpg"
