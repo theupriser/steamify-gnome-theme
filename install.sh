@@ -43,6 +43,14 @@ cp "$here/shell/gnome-shell.css" "$data/themes/SteamifyVapor/gnome-shell/"
 if [[ -f "$config/gtk-4.0/gtk.css" ]] && ! grep -qF "$mark" "$config/gtk-4.0/gtk.css"; then cp -a "$config/gtk-4.0/gtk.css" "$backup/gtk.css"; fi
 { echo "$mark"; cat "$here/gtk-4.0/gtk.css"; } > "$config/gtk-4.0/gtk.css"
 
+# GNOME Settings has no "Ubuntu Desktop" panel (Ubuntu's own patch): launchers for the extensions' preferences stand in for it.
+mkdir -p "$data/applications"
+for entry in "dock|Dock Settings|dash-to-dock@micxgx.gmail.com" "icons|Desktop Icons Settings|ding@rastersoft.com"; do
+    IFS='|' read -r id name uuid <<< "$entry"
+    printf '%s\n' '[Desktop Entry]' 'Type=Application' "Name=$name" "Exec=gnome-extensions prefs $uuid" \
+        'Icon=preferences-desktop' 'Categories=Settings;DesktopSettings;GTK;' > "$data/applications/steamify-$id-settings.desktop"
+done
+
 # 4. Settings.
 gset org.gnome.desktop.interface color-scheme "'prefer-dark'"
 gset org.gnome.desktop.interface accent-color "'blue'"

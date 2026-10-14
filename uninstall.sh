@@ -9,6 +9,7 @@ if [[ -f "$backup/gsettings" ]]; then
 fi
 if [[ -f "$backup/gtk.css" ]]; then mv -f "$backup/gtk.css" "$config/gtk-4.0/gtk.css"
 elif grep -qF "/* Steamify GNOME theme */" "$config/gtk-4.0/gtk.css" 2>/dev/null; then rm -f "$config/gtk-4.0/gtk.css"; fi
+rm -f "$data"/applications/steamify-{dock,icons}-settings.desktop
 rm -rf "$data/themes/SteamifyVapor" "$data/gnome-shell/extensions/steamify-desktop-start@steamify.github.io" \
     "$data/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com" "$backup"
 echo "Done. Log out and in again."
