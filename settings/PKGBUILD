@@ -1,0 +1,61 @@
+# GNOME Settings with the desktop panel (dock, desktop icons, enhanced tiling) from Ubuntu's gnome-control-center,
+# for the Steamify GNOME theme. Replaces the repo's gnome-control-center (same version, Arch's build options).
+# The panel (panel/) is Ubuntu's, GPL-2.0-or-later like GNOME Settings itself; the rest is Arch's recipe.
+pkgname=steamify-gnome-control-center
+_pkgbase=gnome-control-center
+pkgver=51.1
+pkgrel=1
+pkgdesc="GNOME Settings with a Desktop panel: dock, desktop icons, enhanced tiling (Steamify GNOME theme)"
+url="https://github.com/theupriser/steamify-gnome-theme"
+license=(GPL-2.0-or-later)
+arch=(x86_64)
+provides=("gnome-control-center=$pkgver")
+conflicts=(gnome-control-center)
+depends=(
+  accountsservice bolt cairo colord-gtk4 cups-pk-helper dconf fontconfig gcr-4 gdk-pixbuf2 glib2 glibc
+  gnome-bluetooth-3.0 gnome-color-manager gnome-desktop-4 gnome-online-accounts gnome-settings-daemon
+  gnome-shell gnutls graphene gsettings-desktop-schemas gsound gst-plugins-good gtk4 hicolor-icon-theme
+  json-glib krb5 libadwaita libcolord libcups libepoxy libgcc libgoa libgtop libgudev libibus
+  libmalcontent libmm-glib libnm libnma-gtk4 libpulse libpwquality libsecret libsoup3 libwacom libx11
+  libxi libxml2 pango polkit smbclient sound-theme-freedesktop tecla udisks2 upower wayland
+  gnome-keybindings
+)
+makedepends=(blueprint-compiler git glib2-devel meson modemmanager)
+optdepends=('fwupd: device security panel' 'networkmanager: network settings' 'power-profiles-daemon: power profiles'
+  'system-config-printer: printer settings')
+source=(
+  "git+https://gitlab.gnome.org/GNOME/gnome-control-center.git#commit=348dd99d9f3a51a39fe9c60c967a6aabaeb34813"
+  "git+https://gitlab.gnome.org/GNOME/libgnome-volume-control.git"
+  "git+https://gitlab.gnome.org/GNOME/libgxdp.git#commit=df896e3412b749947bc6f62a91a1aac8e6b6d19b"
+)
+b2sums=('SKIP' 'SKIP' 'SKIP')
+
+prepare() {
+  cd $_pkgbase
+  git submodule init
+  git submodule set-url subprojects/gvc "$srcdir/libgnome-volume-control"
+  git -c protocol.file.allow=always -c protocol.allow=never submodule update
+
+  # The Desktop panel: its folder, listed with the panels, loaded and placed after Appearance.
+  cp -r "$startdir/panel" panels/ubuntu
+  sed -i "s/^  'universal-access',/  'ubuntu',\n  'universal-access',/" panels/meson.build
+  sed -i 's/^extern GType cc_background_panel_get_type (void);/&\nextern GType cc_ubuntu_panel_get_type (void);/' shell/cc-panel-loader.c
+  sed -i 's/^    PANEL_TYPE ("background", cc_background_panel_get_type, NULL),/&\n    PANEL_TYPE ("ubuntu", cc_ubuntu_panel_get_type, NULL),/' shell/cc-panel-loader.c
+  sed -i 's/^    "background",/&\n    "ubuntu",/' shell/cc-panel-list.c
+  # Named for what it is here, and shown on every GNOME (Ubuntu's file is for Ubuntu sessions only).
+  sed -i -e 's/^Name=.*/Name=GNOME Desktop/' -e 's/^Comment=.*/Comment=Dock, desktop icons and tiling settings/' \
+    -e '/^OnlyShowIn=/d' panels/ubuntu/gnome-ubuntu-panel.desktop.in
+}
+
+build() {
+  export MESON_PACKAGE_CACHE_DIR="$srcdir"
+  arch-meson $_pkgbase build -D documentation=false -D location-services=enabled -D malcontent=true
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --no-rebuild --destdir "$pkgdir"
+  # gnome-keybindings is its own package in the repo.
+  rm -rf "$pkgdir"/usr/share/gettext/its/gnome-keybindings.* "$pkgdir"/usr/share/gnome-control-center/keybindings \
+    "$pkgdir"/usr/share/pkgconfig/gnome-keybindings.pc
+}

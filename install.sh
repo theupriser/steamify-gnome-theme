@@ -76,6 +76,7 @@ if [[ -f "$wallpaper" ]]; then
 fi
 d=org.gnome.shell.extensions.dash-to-dock
 gset $d dock-position "'LEFT'"; gset $d dock-fixed true   # its shape (panel or floating) is yours: Dock Settings
+gset org.gnome.shell.extensions.ding show-trash false   # the trash is in the dock, not on the desktop
 gset $d click-action "'minimize-or-previews'"; gset $d show-trash true; gset $d running-indicator-style "'DOTS'";
 enabled="$(gsettings get org.gnome.shell enabled-extensions)"
 for uuid in "${uuids[@]}"; do

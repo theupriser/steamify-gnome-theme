@@ -1,0 +1,73 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $CcUbuntuDockDialog: Dialog {
+  width-request: 386;
+  can-focus: false;
+  modal: true;
+  destroy-with-parent: true;
+  hide-on-close: true;
+
+  [internal-child content_area]
+  Box {
+    can-focus: false;
+    orientation: vertical;
+    spacing: 2;
+
+    Adw.PreferencesGroup {
+      margin-top: 12;
+      margin-bottom: 12;
+      margin-start: 12;
+      margin-end: 12;
+
+      Adw.SwitchRow volumes_switch {
+        use-underline: true;
+        can-focus: true;
+        title: _("Show _Volumes and _Devices");
+      }
+
+      Adw.ActionRow unmounted_row {
+        use-underline: true;
+        can-focus: true;
+        title: C_("ubuntu-dock", "Include _Unmounted Volumes");
+        activatable: true;
+        activatable-widget: unmounted_check;
+        sensitive: bind volumes_switch.active;
+
+        [prefix]
+        CheckButton unmounted_check {
+          can-focus: true;
+          valign: center;
+        }
+      }
+
+      Adw.ActionRow network_volumes_row {
+        use-underline: true;
+        can-focus: true;
+        title: C_("ubuntu-dock", "Include _Network Volumes");
+        activatable: true;
+        activatable-widget: network_volumes_check;
+        sensitive: bind volumes_switch.active;
+
+        [prefix]
+        CheckButton network_volumes_check {
+          can-focus: true;
+          valign: center;
+        }
+      }
+    }
+
+    Adw.PreferencesGroup {
+      margin-top: 12;
+      margin-bottom: 12;
+      margin-start: 12;
+      margin-end: 12;
+
+      Adw.SwitchRow trash_switch {
+        use-underline: true;
+        can-focus: true;
+        title: _("Show _Trash");
+      }
+    }
+  }
+}
