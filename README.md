@@ -13,3 +13,16 @@ What it sets up (all of it undoable):
 Install with `./install.sh`, remove with `./uninstall.sh`.
 
 Status: prototype, made alongside Steamify's GNOME support (steamify-cachyos, `feature/gnome-prototype`).
+
+## GNOME Settings with a "GNOME Desktop" panel
+
+Ubuntu manages the dock, the desktop icons and tiling in its own panel inside GNOME Settings. GNOME Settings
+can't load panels as plug-ins, so `settings/` builds the same Settings app (Arch's 51.1) with Ubuntu's panel added,
+shown as **GNOME Desktop** under Appearance:
+
+    cd settings && makepkg -si
+
+It replaces the `gnome-control-center` package (it provides it). The panel is Ubuntu's, ported from GNOME 50 to 51
+(two API changes in `panel/cc-ubuntu-panel.c`); the install script puts the extensions' settings schemas in
+`~/.local/share/glib-2.0/schemas`, where the panel looks for them. Dock and Enhanced Tiling show up once their
+extensions are loaded, which is after the next login.

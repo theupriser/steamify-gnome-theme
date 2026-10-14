@@ -12,5 +12,5 @@ elif grep -qF "/* Steamify GNOME theme */" "$config/gtk-4.0/gtk.css" 2>/dev/null
 rm -f "$data"/applications/steamify-{dock,icons}-settings.desktop
 rm -rf "$data/gnome-shell/extensions/steamify-vapor@steamify.github.io" \
     "$data/gnome-shell/extensions/ubuntu-dock@ubuntu.com" "$data/gnome-shell/extensions/tiling-assistant@ubuntu.com" \
-    "$data/gnome-background-properties/steamify-steamos.xml" "$backup"
+    "$data/gnome-background-properties/steamify-steamos.xml" "$data"/glib-2.0/schemas/org.gnome.shell.extensions.{dash-to-dock,tiling-assistant}.gschema.xml "$backup"
 echo "Done. Log out and in again."

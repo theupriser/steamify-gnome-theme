@@ -886,12 +886,11 @@ on_dock_monitor_row_changed (CcUbuntuPanel *self)
 static void
 on_dock_behavior_row_activated (CcUbuntuPanel *self)
 {
-  CcShell *shell = cc_panel_get_shell (CC_PANEL (self));
   CcUbuntuDockDialog *dialog;
 
   dialog = cc_ubuntu_dock_dialog_new (self->dock_settings);
   gtk_window_set_transient_for (GTK_WINDOW (dialog),
-                                GTK_WINDOW (cc_shell_get_toplevel (shell)));
+                                GTK_WINDOW (cc_panel_get_toplevel (CC_PANEL (self))));
   gtk_widget_set_visible (GTK_WIDGET (dialog), TRUE);
 }
 
@@ -1025,14 +1024,12 @@ cc_ubuntu_panel_class_init (CcUbuntuPanelClass *klass)
 static void
 mapped_cb (CcUbuntuPanel *self)
 {
-  CcShell *shell;
   GtkWidget *toplevel;
 
   if (!self->dock_settings)
     return;
 
-  shell = cc_panel_get_shell (CC_PANEL (self));
-  toplevel = cc_shell_get_toplevel (shell);
+  toplevel = GTK_WIDGET (cc_panel_get_toplevel (CC_PANEL (self)));
 
   g_signal_handlers_disconnect_by_func (toplevel, mapped_cb, self);
   g_signal_connect_object (toplevel, "notify::has-toplevel-focus",

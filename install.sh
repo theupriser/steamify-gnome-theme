@@ -45,6 +45,11 @@ sed -i 's|"uuid": "tiling-assistant@leleat-on-github"|"uuid": "tiling-assistant@
 glib-compile-schemas "$tiling/schemas"
 rm -rf "$work"
 
+# GNOME Settings' Desktop panel finds the settings of the dock and of tiling in the default schema folders.
+mkdir -p "$data/glib-2.0/schemas"
+cp "$data"/gnome-shell/extensions/{ubuntu-dock,tiling-assistant}@ubuntu.com/schemas/*.gschema.xml "$data/glib-2.0/schemas/"
+glib-compile-schemas "$data/glib-2.0/schemas"
+
 # 3. Our extension (the shell colors as its stylesheet, and start on the desktop, not in the overview), the GTK4 colors.
 mkdir -p "$data/gnome-shell/extensions" "$config/gtk-4.0"
 rm -rf "$data/gnome-shell/extensions/steamify-vapor@steamify.github.io"
