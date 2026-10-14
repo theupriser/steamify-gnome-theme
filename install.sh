@@ -10,8 +10,7 @@ backup="${XDG_STATE_HOME:-$HOME/.local/state}/steamify-gnome-theme"
 mark="/* Steamify GNOME theme */"
 dock_url="https://github.com/micheleg/dash-to-dock/releases/download/extensions.gnome.org-v110/dash-to-dock@micxgx.gmail.com.zip"
 dock_sha256=3e60680fe7217b905aac4f10deb042e39fcf49168c9b8fdcc5a711bdd49bd3d2
-uuids=(ding@rastersoft.com appindicatorsupport@rgcjonas.gmail.com user-theme@gnome-shell-extensions.gcampax.github.com
-    dash-to-dock@micxgx.gmail.com steamify-desktop-start@steamify.github.io)
+uuids=(ding@rastersoft.com appindicatorsupport@rgcjonas.gmail.com dash-to-dock@micxgx.gmail.com steamify-vapor@steamify.github.io)
 
 mkdir -p "$backup"
 gset() {
@@ -22,9 +21,8 @@ gset() {
     gsettings set "$1" "$2" "$3"
 }
 
-# 1. Packages: desktop icons, tray icons, User Themes (loads the shell theme), the Steam Deck wallpapers.
-sudo pacman -S --needed --noconfirm gnome-shell-extension-desktop-icons-ng gnome-shell-extension-appindicator \
-    gnome-shell-extensions cachyos-vapor
+# 1. Packages: desktop icons, tray icons, the Steam Deck wallpapers.
+sudo pacman -S --needed --noconfirm gnome-shell-extension-desktop-icons-ng gnome-shell-extension-appindicator cachyos-vapor
 
 # 2. Dash to Dock (what Ubuntu Dock is based on): upstream's release, pinned; the packaged one lags behind GNOME.
 dock="$data/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com"
@@ -36,10 +34,10 @@ python3 -c 'import sys,zipfile;zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[
 glib-compile-schemas "$dock/schemas"
 rm -f "$zip"
 
-# 3. Our extension (start on the desktop, not in the overview), the shell theme, the GTK4 colors.
-mkdir -p "$data/gnome-shell/extensions" "$data/themes/SteamifyVapor/gnome-shell" "$config/gtk-4.0"
-cp -r "$here/extensions/steamify-desktop-start@steamify.github.io" "$data/gnome-shell/extensions/"
-cp "$here/shell/gnome-shell.css" "$data/themes/SteamifyVapor/gnome-shell/"
+# 3. Our extension (the shell colors as its stylesheet, and start on the desktop, not in the overview), the GTK4 colors.
+mkdir -p "$data/gnome-shell/extensions" "$config/gtk-4.0"
+rm -rf "$data/gnome-shell/extensions/steamify-vapor@steamify.github.io"
+cp -r "$here/extensions/steamify-vapor@steamify.github.io" "$data/gnome-shell/extensions/"
 if [[ -f "$config/gtk-4.0/gtk.css" ]] && ! grep -qF "$mark" "$config/gtk-4.0/gtk.css"; then cp -a "$config/gtk-4.0/gtk.css" "$backup/gtk.css"; fi
 { echo "$mark"; cat "$here/gtk-4.0/gtk.css"; } > "$config/gtk-4.0/gtk.css"
 
@@ -59,9 +57,8 @@ if [[ -f "$wallpaper" ]]; then
     for key in picture-uri picture-uri-dark; do gset org.gnome.desktop.background $key "'file://${wallpaper// /%20}'"; done
     gset org.gnome.desktop.background picture-options "'zoom'"
 fi
-gset org.gnome.shell.extensions.user-theme name "'SteamifyVapor'"
 d=org.gnome.shell.extensions.dash-to-dock
-gset $d dock-position "'LEFT'"; gset $d extend-height true; gset $d dock-fixed true
+gset $d dock-position "'LEFT'"; gset $d dock-fixed true   # its shape (panel or floating) is yours: Dock Settings
 gset $d transparency-mode "'FIXED'"; gset $d custom-background-color true; gset $d background-color "'#24272c'"
 gset $d background-opacity 0.95; gset $d running-indicator-style "'DOTS'"; gset $d custom-theme-shrink true
 enabled="$(gsettings get org.gnome.shell enabled-extensions)"
