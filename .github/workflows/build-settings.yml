@@ -1,0 +1,70 @@
+name: Build GNOME Settings package
+
+# Builds settings/ (GNOME Settings with the Desktop panel) on current Arch and publishes it as the rolling release
+# "settings", so installers download it instead of compiling for several minutes. Arch is rolling and the package links
+# against today's libraries: rebuilt every week, too, so it keeps matching what Arch ships.
+
+on:
+  push:
+    branches: [main]
+    paths: ['settings/**', '.github/workflows/build-settings.yml']
+  pull_request:
+    paths: ['settings/**', '.github/workflows/build-settings.yml']
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-settings
+  cancel-in-progress: false
+
+env:
+  PKG: steamify-gnome-control-center
+  TAG: settings
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Update the system and install the tools
+        run: pacman -Syu --noconfirm --needed git github-cli sudo
+
+      - uses: actions/checkout@v4
+
+      - name: Build the package (makepkg refuses root)
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          su builder -c "cd '$GITHUB_WORKSPACE/settings' && makepkg -s --noconfirm --nocheck"
+
+      - name: Check that it installs on a plain Arch
+        run: |
+          pkg="$(ls settings/${PKG}-*.pkg.tar.zst | grep -v -- '-debug-' | head -1)"
+          echo "PKGFILE=$pkg" >> "$GITHUB_ENV"
+          pacman -U --noconfirm "$pkg"
+          pacman -Qi "$PKG"
+          test -e /usr/share/gnome-control-center/ui/ubuntu 2>/dev/null || ls /usr/share/gnome-control-center || true
+
+      - name: Publish the release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          ver="$(pacman -Q "$PKG" | cut -d' ' -f2)"
+          cp "$PKGFILE" "${PKG}-x86_64.pkg.tar.zst"
+          sha256sum "${PKG}-x86_64.pkg.tar.zst" > "${PKG}-x86_64.pkg.tar.zst.sha256"
+          notes="$PKG $ver, built $(date -u +%F) on current Arch from $GITHUB_SHA."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --notes "$notes"
+          else
+            gh release create "$TAG" --title "GNOME Settings package" --notes "$notes" --target "$GITHUB_SHA"
+          fi
+          gh release upload "$TAG" --clobber \
+            "${PKG}-x86_64.pkg.tar.zst" "${PKG}-x86_64.pkg.tar.zst.sha256"
