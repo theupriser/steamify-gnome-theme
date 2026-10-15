@@ -22,6 +22,11 @@ shown as **GNOME Desktop** under Appearance:
 
     cd settings && makepkg -si
 
+A prebuilt package is on the [`settings` release](../../releases/tag/settings) (built by GitHub Actions on current
+Arch, rebuilt every week), so the several minutes of compiling can be skipped: download
+`steamify-gnome-control-center-x86_64.pkg.tar.zst` and its `.sha256`, check it with `sha256sum -c`, then
+`sudo pacman -U --ask 4 steamify-gnome-control-center-x86_64.pkg.tar.zst`.
+
 It replaces the `gnome-control-center` package (it provides it). The panel is Ubuntu's, ported from GNOME 50 to 51
 (two API changes in `panel/cc-ubuntu-panel.c`); the install script puts the extensions' settings schemas in
 `~/.local/share/glib-2.0/schemas`, where the panel looks for them. Dock and Enhanced Tiling show up once their
